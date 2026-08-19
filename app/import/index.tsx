@@ -1,11 +1,8 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Icon } from '@/components/icon';
 import { PrimaryButton } from '@/components/primary-button';
-import { foodImages } from '@/lib/images';
 import { importRecipeFromUrl } from '@/lib/recipe-import';
 import { theme } from '@/lib/theme';
 import { useAppState } from '@/state/app-state';
@@ -15,25 +12,66 @@ export default function ImportScreen() {
   const [url, setUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [photo, setPhoto] = useState<string | null>(null);
 
   const importUrl = async () => {
-    if (!url.trim()) return;
-    setBusy(true); setError('');
-    try { const recipe = await importRecipeFromUrl(url.trim()); addRecipe(recipe); router.replace({ pathname: '/recipe/[id]', params: { id: recipe.id } }); }
-    catch (e) { setError(e instanceof Error ? e.message : 'Import fehlgeschlagen.'); }
-    finally { setBusy(false); }
+    const value = url.trim();
+    if (!value || busy) return;
+    setBusy(true);
+    setError('');
+    try {
+      const recipe = await importRecipeFromUrl(value);
+      addRecipe(recipe);
+      router.replace({ pathname: '/recipe/[id]', params: { id: recipe.id } });
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Das Rezept konnte nicht importiert werden.');
+    } finally {
+      setBusy(false);
+    }
   };
-  const choosePhoto = async () => { const r = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.8 }); if (!r.canceled) setPhoto(r.assets[0].uri); };
 
   return (
-    <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, gap: 22 }}>
-      <View style={{ gap: 9 }}><Text style={{ fontWeight: '800', fontSize: 14 }}>Füge den Link zum Rezept ein</Text><TextInput autoCapitalize="none" keyboardType="url" value={url} onChangeText={setUrl} placeholder="https://www.chefkoch.de/..." style={{ minHeight: 48, borderWidth: 1, borderColor: theme.line, borderRadius: 12, paddingHorizontal: 13 }} /><PrimaryButton title={busy ? 'Importiere…' : 'Importieren'} onPress={importUrl} /></View>
-      {error ? <Text selectable style={{ color: theme.danger, fontSize: 13 }}>{error}</Text> : null}
-      <View style={{ alignItems: 'center', flexDirection: 'row', gap: 12 }}><View style={{ height: 1, flex: 1, backgroundColor: theme.line }} /><Text style={{ color: theme.muted, fontSize: 12 }}>Oder Rezept aus Foto</Text><View style={{ height: 1, flex: 1, backgroundColor: theme.line }} /></View>
-      {photo ? <Image source={{ uri: photo }} style={{ height: 180, width: '100%', borderRadius: 16 }} contentFit="cover" /> : null}
-      <Pressable onPress={choosePhoto} style={{ minHeight: 52, borderWidth: 1, borderColor: theme.line, borderRadius: 12, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 }}><Icon name="photo" size={17} /><Text style={{ fontWeight: '600' }}>Foto auswählen</Text></Pressable>
-      <View style={{ gap: 10, marginTop: 6 }}><Text style={{ fontWeight: '800' }}>Zuletzt importiert</Text><View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}><Image source={foodImages.bread} style={{ width: 56, height: 56, borderRadius: 12 }} contentFit="cover" /><View><Text style={{ fontWeight: '700' }}>Dinkelbrot</Text><Text style={{ color: theme.muted, fontSize: 12 }}>Beispiel</Text></View></View><View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}><Image source={foodImages.soup} style={{ width: 56, height: 56, borderRadius: 12 }} contentFit="cover" /><View><Text style={{ fontWeight: '700' }}>Zucchini Suppe</Text><Text style={{ color: theme.muted, fontSize: 12 }}>Beispiel</Text></View></View></View>
+    <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 16, paddingBottom: 34, gap: 16, backgroundColor: theme.bg }}>
+      <View style={{ backgroundColor: 'white', borderRadius: 22, borderWidth: 1, borderColor: theme.line, padding: 18, gap: 14 }}>
+        <View style={{ width: 50, height: 50, borderRadius: 16, backgroundColor: theme.greenSoft, alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="link" size={22} tintColor={theme.greenDark} />
+        </View>
+        <View style={{ gap: 5 }}>
+          <Text style={{ fontSize: 21, fontWeight: '900' }}>Rezept aus Link importieren</Text>
+          <Text style={{ color: theme.muted, lineHeight: 19 }}>Füge eine öffentliche Rezept-URL ein. CookMate übernimmt verfügbare Rezeptdaten und speichert sie lokal.</Text>
+        </View>
+        <TextInput
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+          returnKeyType="go"
+          onSubmitEditing={importUrl}
+          editable={!busy}
+          value={url}
+          onChangeText={setUrl}
+          placeholder="https://..."
+          placeholderTextColor="#9A9D98"
+          style={{ minHeight: 50, borderWidth: 1, borderColor: error ? theme.danger : theme.line, backgroundColor: '#FAFBF9', borderRadius: 14, paddingHorizontal: 13, color: theme.text }}
+        />
+        {error ? (
+          <View style={{ flexDirection: 'row', gap: 8, borderRadius: 12, backgroundColor: '#FFF1F0', padding: 11 }}>
+            <Icon name="exclamationmark.circle.fill" size={16} tintColor={theme.danger} />
+            <Text selectable style={{ flex: 1, color: theme.danger, fontSize: 12, lineHeight: 17 }}>{error}</Text>
+          </View>
+        ) : null}
+        <PrimaryButton title={busy ? 'Import wird geprüft …' : 'Rezept importieren'} onPress={importUrl} />
+      </View>
+
+      <View style={{ backgroundColor: 'white', borderRadius: 18, borderWidth: 1, borderColor: theme.line, padding: 16, gap: 10 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+          <Icon name="lock.shield.fill" size={19} tintColor={theme.greenDark} />
+          <Text style={{ fontWeight: '900' }}>Sauberer Import</Text>
+        </View>
+        <Text style={{ color: theme.muted, fontSize: 12, lineHeight: 18 }}>Es wird nur ein Rezept angelegt, wenn verwertbare Rezeptdaten gefunden wurden. Fehlschläge erzeugen keine leeren Einträge.</Text>
+      </View>
+
+      <Pressable onPress={() => router.back()} style={{ alignSelf: 'center', padding: 8 }}>
+        <Text style={{ color: theme.greenDark, fontWeight: '800' }}>Abbrechen</Text>
+      </Pressable>
     </ScrollView>
   );
 }
