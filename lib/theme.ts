@@ -1,12 +1,15 @@
 export const theme = {
-  green: '#2E9B45',
-  greenDark: '#16732D',
-  greenSoft: '#EAF6ED',
-  text: '#111111',
-  muted: '#6E6E73',
-  line: '#E7E7EA',
-  bg: '#F7F7F8',
+  green: '#4A9F38',
+  greenDark: '#2D7B2F',
+  greenBright: '#76C442',
+  greenSoft: '#EEF7E9',
+  text: '#151515',
+  muted: '#737373',
+  line: '#E8EAE6',
+  bg: '#F6F8F4',
   card: '#FFFFFF',
-  warning: '#C66A00',
-  danger: '#D92D20'
+  warning: '#F07A18',
+  danger: '#D92D20',
+  dark: '#0B0E0C',
+  darkCard: '#151A16'
 };
