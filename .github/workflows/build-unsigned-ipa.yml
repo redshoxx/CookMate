@@ -31,6 +31,9 @@ jobs:
       - name: Align Expo dependencies
         run: CI=1 npx expo install --fix
 
+      - name: TypeScript check
+        run: npx tsc --noEmit
+
       - name: Verify iOS JavaScript bundle
         run: CI=1 npx expo export --platform ios --output-dir dist --clear
 
