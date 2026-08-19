@@ -1,0 +1,35 @@
+{
+  "expo": {
+    "name": "CookMate",
+    "slug": "cookmate",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "cookmate",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "at.cookmate.app",
+      "infoPlist": {
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true,
+        "NSPhotoLibraryUsageDescription": "CookMate verwendet deine Fotos, um Rezeptbilder auszuwählen."
+      }
+    },
+    "android": {
+      "package": "at.cookmate.app"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "CookMate benötigt Zugriff auf deine Fotos, um Rezeptbilder auszuwählen."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
