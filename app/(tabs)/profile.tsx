@@ -1,12 +1,12 @@
-import { Link } from 'expo-router';
+import { Href, Link } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Icon } from '@/components/icon';
 import { theme } from '@/lib/theme';
 import { useAppState } from '@/state/app-state';
 
-function Row({ icon, title, subtitle, href }: { icon: string; title: string; subtitle: string; href: string }) {
+function Row({ icon, title, subtitle, href }: { icon: string; title: string; subtitle: string; href: Href }) {
   return (
-    <Link href={href as never} asChild>
+    <Link href={href} asChild>
       <Pressable style={({ pressed }) => ({ minHeight: 70, flexDirection: 'row', alignItems: 'center', gap: 13, paddingHorizontal: 15, opacity: pressed ? 0.7 : 1 })}>
         <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: theme.greenSoft, alignItems: 'center', justifyContent: 'center' }}>
           <Icon name={icon} size={18} tintColor={theme.greenDark} />
