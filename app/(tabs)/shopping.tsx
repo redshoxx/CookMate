@@ -1,48 +1,115 @@
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { Icon } from '@/components/icon';
-import { PrimaryButton } from '@/components/primary-button';
 import { theme } from '@/lib/theme';
 import { useAppState } from '@/state/app-state';
-
-const categoryOrder = ['Obst & Gemüse', 'Milchprodukte', 'Fleisch', 'Backwaren', 'Sonstiges'];
 
 export default function ShoppingScreen() {
   const { shopping, toggleShopping, addShoppingItem, removeShoppingItem } = useAppState();
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState('');
-  const grouped = useMemo(() => categoryOrder.map(category => ({ category, items: shopping.filter(i => i.category === category) })).filter(g => g.items.length), [shopping]);
+
+  const doneCount = useMemo(() => shopping.filter(i => i.done).length, [shopping]);
+  const progress = shopping.length ? Math.round((doneCount / shopping.length) * 100) : 0;
 
   const add = () => {
     if (!name.trim()) return;
     addShoppingItem({ id: `custom-${Date.now()}`, name: name.trim(), amount: 1, unit: 'Stk.', category: 'Sonstiges', done: false });
-    setName(''); setAdding(false);
+    setName('');
+    setAdding(false);
   };
 
   return (
-    <ScrollView contentInsetAdjustmentBehavior="automatic" keyboardShouldPersistTaps="handled" contentContainerStyle={{ padding: 20, paddingTop: 58, paddingBottom: 30, gap: 18 }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}><Text style={{ fontSize: 28, fontWeight: '800' }}>Einkaufsliste</Text><Icon name="arrow.clockwise" size={18} /></View>
-      {grouped.map(group => (
-        <View key={group.category} style={{ gap: 4 }}>
-          <Text style={{ color: theme.greenDark, fontWeight: '800', fontSize: 14, paddingVertical: 5 }}>{group.category}</Text>
-          {group.items.map(item => (
-            <Pressable key={item.id} onPress={() => toggleShopping(item.id)} onLongPress={() => removeShoppingItem(item.id)} style={{ minHeight: 48, flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderColor: theme.line, gap: 12 }}>
-              <View style={{ width: 21, height: 21, borderRadius: 11, borderWidth: 1.5, borderColor: item.done ? theme.green : '#76A987', backgroundColor: item.done ? theme.green : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
-                {item.done ? <Icon name="checkmark" size={12} tintColor="white" /> : null}
-              </View>
-              <Text style={{ flex: 1, fontSize: 14, textDecorationLine: item.done ? 'line-through' : 'none', color: item.done ? '#999' : theme.text }}>{item.name}</Text>
-              <Text style={{ fontSize: 13, color: item.done ? '#AAA' : theme.text, fontVariant: ['tabular-nums'] }}>{Number.isInteger(item.amount) ? item.amount : item.amount.toFixed(1)} {item.unit}</Text>
-            </Pressable>
-          ))}
-        </View>
-      ))}
+    <ScrollView
+      contentInsetAdjustmentBehavior="automatic"
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ paddingHorizontal: 12, paddingTop: 52, paddingBottom: 34, backgroundColor: '#FAFAF8', minHeight: '100%' }}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Text selectable style={{ fontSize: 26, fontWeight: '900', letterSpacing: -0.6 }}>Einkaufsliste</Text>
+        <Pressable onPress={() => setAdding(true)} style={{ width: 36, height: 36, alignItems: 'center', justifyContent: 'center' }}>
+          <Icon name="plus.circle.fill" size={25} tintColor="#55A845" />
+        </Pressable>
+      </View>
+
+      <Text selectable style={{ marginTop: 4, color: '#686868', fontSize: 12 }}>{doneCount} von {shopping.length} erledigt</Text>
+
+      <View style={{ height: 4, borderRadius: 4, backgroundColor: '#D9D9D5', marginTop: 10, overflow: 'hidden' }}>
+        <View style={{ width: `${progress}%`, height: '100%', backgroundColor: '#55A845', borderRadius: 4 }} />
+      </View>
+
+      <View style={{ marginTop: 12 }}>
+        {shopping.map(item => (
+          <Pressable
+            key={item.id}
+            onPress={() => toggleShopping(item.id)}
+            onLongPress={() => removeShoppingItem(item.id)}
+            style={{
+              minHeight: 43,
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 10,
+              borderBottomWidth: 1,
+              borderColor: '#ECEDE8'
+            }}
+          >
+            <View
+              style={{
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                borderWidth: 1.4,
+                borderColor: item.done ? '#4C9C44' : '#A7A9A3',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: item.done ? '#F1F8EF' : 'transparent'
+              }}
+            >
+              {item.done ? <Icon name="checkmark" size={12} tintColor="#428F3C" /> : null}
+            </View>
+
+            <Text
+              selectable
+              style={{
+                flex: 1,
+                fontSize: 14,
+                color: item.done ? '#737873' : '#262826',
+                textDecorationLine: item.done ? 'line-through' : 'none'
+              }}
+            >
+              {item.name}
+            </Text>
+
+            <Text selectable style={{ fontSize: 13, fontWeight: '700', color: '#438B3D', fontVariant: ['tabular-nums'] }}>
+              {Number.isInteger(item.amount) ? item.amount : item.amount.toFixed(1)} {item.unit}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+
       {adding ? (
-        <View style={{ flexDirection: 'row', gap: 8 }}>
-          <TextInput autoFocus value={name} onChangeText={setName} onSubmitEditing={add} placeholder="Produktname" style={{ flex: 1, borderWidth: 1, borderColor: theme.line, borderRadius: 12, paddingHorizontal: 13, minHeight: 48 }} />
-          <Pressable onPress={add} style={{ width: 48, borderRadius: 12, backgroundColor: theme.green, alignItems: 'center', justifyContent: 'center' }}><Icon name="checkmark" tintColor="white" /></Pressable>
+        <View style={{ marginTop: 18, backgroundColor: 'white', borderRadius: 14, padding: 10, flexDirection: 'row', gap: 8, boxShadow: '0 1px 5px rgba(0,0,0,0.10)' }}>
+          <TextInput
+            autoFocus
+            value={name}
+            onChangeText={setName}
+            onSubmitEditing={add}
+            placeholder="Produkt hinzufügen"
+            returnKeyType="done"
+            style={{ flex: 1, minHeight: 44, paddingHorizontal: 10, fontSize: 14 }}
+          />
+          <Pressable onPress={add} style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: '#55A845', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="checkmark" size={17} tintColor="white" />
+          </Pressable>
+          <Pressable onPress={() => setAdding(false)} style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: '#F0F1EE', alignItems: 'center', justifyContent: 'center' }}>
+            <Icon name="xmark" size={15} tintColor="#555" />
+          </Pressable>
         </View>
-      ) : <PrimaryButton title="Produkt hinzufügen" icon="＋" onPress={() => setAdding(true)} />}
-      <Text style={{ fontSize: 11, color: theme.muted, textAlign: 'center' }}>Tipp: Produkt lange gedrückt halten, um es zu löschen.</Text>
+      ) : null}
+
+      <Text selectable style={{ marginTop: 16, textAlign: 'center', fontSize: 10.5, color: theme.muted }}>
+        Antippen zum Abhaken · lange drücken zum Löschen
+      </Text>
     </ScrollView>
   );
 }
