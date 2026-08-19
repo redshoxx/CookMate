@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
+import { StatusBar } from 'expo-status-bar';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Icon } from '@/components/icon';
 import { foodImages } from '@/lib/images';
@@ -48,6 +49,7 @@ export default function CookingScreen() {
   if (!recipe || !step) {
     return (
       <View style={{ flex: 1, backgroundColor: '#080A09', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+        <StatusBar style="light" />
         <Text style={{ color: 'white', fontWeight: '800' }}>Kochschritt nicht verfügbar.</Text>
         <Pressable onPress={() => router.back()}><Text style={{ color: '#83CF35', fontWeight: '800' }}>Zurück</Text></Pressable>
       </View>
@@ -59,6 +61,7 @@ export default function CookingScreen() {
 
   return (
     <ScrollView contentInsetAdjustmentBehavior="automatic" bounces={false} style={{ flex: 1, backgroundColor: '#080A09' }} contentContainerStyle={{ minHeight: '100%', paddingHorizontal: 12, paddingTop: 48, paddingBottom: 28, backgroundColor: '#080A09' }}>
+      <StatusBar style="light" />
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7 }}>
         <View style={{ width: 29, height: 29, borderRadius: 8, borderWidth: 2, borderColor: '#79C735', alignItems: 'center', justifyContent: 'center' }}><Icon name="fork.knife" size={14} tintColor="#8AD73A" /></View>
         <Text selectable style={{ color: 'white', fontSize: 22, fontWeight: '900', letterSpacing: -0.4 }}>Cook<Text style={{ color: '#8AD73A' }}>Mate</Text></Text>
